@@ -14,9 +14,10 @@ import {
 initializeAuthentication()
 
 const useFirebase = () => {
-    const [user, setUser] = useState();
+    const [user, setUser] = useState({});
     const [authError, setAuthError] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [admin, setAdmin] = useState(false);
 
     const auth = getAuth();
     const googleProvider = new GoogleAuthProvider();
@@ -28,6 +29,8 @@ const useFirebase = () => {
                 setAuthError('');
                 const newUser = { email, displayName: name };
                 setUser(newUser);
+
+                saveUser(email, name, 'POST');
 
                 updateProfile(auth.currentUser, {
                     displayName: name
@@ -69,9 +72,14 @@ const useFirebase = () => {
             .then((result) => {
                 const user = result.user;
                 setAuthError('');
-            }).catch((error) => {
+                saveUser(user.email, user.displayName, 'PUT');
+                const destination = location?.state?.from || '/';
+                history.replace(destination);
+            })
+            .catch((error) => {
                 setAuthError(error.message);
-            }).finally(() => setIsLoading(false));
+            })
+            .finally(() => setIsLoading(false));
     }
 
     useEffect(() => {
@@ -86,6 +94,14 @@ const useFirebase = () => {
         return () => unsubscribe;
     }, []);
 
+    useEffect(() => {
+        fetch(`http://localhost:5000/users/${user.email}`)
+            .then(res => res.json())
+            .then(data => {
+                setAdmin(data.admin);
+            })
+    }, [user.email]);
+
     const logOut = () => {
         setIsLoading(true);
         signOut(auth).then(() => {
@@ -95,8 +111,21 @@ const useFirebase = () => {
         })
             .finally(() => setIsLoading(false));
     }
+
+    const saveUser = (email, displayName, method) => {
+        const user = { email, displayName };
+        fetch('http://localhost:5000/users', {
+            method: method,
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify(user)
+        })
+            .then()
+    }
     return {
         user,
+        admin,
         isLoading,
         authError,
         registerUser,
