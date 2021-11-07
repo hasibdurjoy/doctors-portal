@@ -1,29 +1,34 @@
 import React, { useState } from 'react';
 import { TextField, Button, Alert, AlertTitle } from '@mui/material';
+import useAuth from '../../../hooks/useAuth';
 
 const MakeAdmin = () => {
     const [email, setEmail] = useState('');
     const [success, setSuccess] = useState(false);
+    const { authToken } = useAuth();
     const handleOnBlur = e => {
         setEmail(e.target.value);
     }
     const handleAdminSubmit = e => {
-        const user = { email }
+        const user = { email };
+        console.log(user, authToken)
         fetch('http://localhost:5000/users/admin', {
-            method: "PUT",
+            method: 'PUT',
             headers: {
-                "content-type": "application/json"
+                'authorization': `Bearer ${authToken}`,
+                'content-type': 'application/json'
             },
             body: JSON.stringify(user)
         })
             .then(res => res.json())
             .then(data => {
                 if (data.modifiedCount) {
+                    console.log(data);
                     setSuccess(true);
-                    setEmail('');
                 }
             })
-        e.preventDefault();
+
+        e.preventDefault()
     }
     return (
         <div>
