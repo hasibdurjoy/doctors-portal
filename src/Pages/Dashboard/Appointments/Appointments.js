@@ -7,17 +7,20 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import { Button } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 const Appointments = ({ date }) => {
     const { user } = useAuth();
     const [appointments, setAppointments] = useState([]);
 
     useEffect(() => {
-        const url = `https://still-eyrie-33913.herokuapp.com/appointments/?email=${user.email}&date=${date}`
+        const url = `https://still-eyrie-33913.herokuapp.com/appointments/?email=${user.email}&date=${date.toLocaleDateString()}`
         fetch(url)
             .then(res => res.json())
             .then(data => setAppointments(data))
-    }, [date])
+    }, [date]);
+    console.log(appointments);
     return (
         <div>
             <h1>Appointments {appointments.length} <small>{date.toDateString()}</small> </h1>
@@ -34,7 +37,7 @@ const Appointments = ({ date }) => {
                     </TableHead>
                     <TableBody>
                         {appointments.map((appointment) => (
-                            <TableRow
+                            <TableRow TableRow
                                 key={appointment._id}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
@@ -43,12 +46,21 @@ const Appointments = ({ date }) => {
                                 </TableCell>
                                 <TableCell align="right">{appointment.time}</TableCell>
                                 <TableCell align="right">{appointment.serviceName}</TableCell>
+                                <TableCell align="right">
+                                    {
+                                        appointment.payment ? "Paid"
+                                            :
+                                            <Link to={`/dashboard/pay/${appointment._id}`}>
+                                                <Button variant="contained">Pay</Button>
+                                            </Link>
+                                    }
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
             </TableContainer>
-        </div>
+        </div >
     );
 };
 

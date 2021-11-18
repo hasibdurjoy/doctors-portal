@@ -6,6 +6,7 @@ const MakeAdmin = () => {
     const [email, setEmail] = useState('');
     const [success, setSuccess] = useState(false);
     const { authToken } = useAuth();
+
     const handleOnBlur = e => {
         setEmail(e.target.value);
     }
